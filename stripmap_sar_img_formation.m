@@ -146,30 +146,20 @@ pulseCompression = phased.RangeResponse('RangeMethod', 'Matched filter',...
                                         'PropagationSpeed', c,...
                                         'SampleRate', fs);
 matchingCoeff = getMatchedFilter(waveform);
-[cdata, rnggrid] = pulseCompression(rxsig, matchingCoeff);
+[cdata, rnggrid] = doRangeCompression(rxsig, matchingCoeff, fs);
 
 figure(3); imagesc(abs(cdata)); title('SAR Range Compressed Data')
 xlabel('Cross-Range Samples')
 ylabel('Range Samples')
 
 % Perform azimuth Compression.
-% Range compression helps achieve resolution in the fast-time or range
-% direction and the resolution in the cross-range direction is achieved by
-% azimuth or cross-range compression. 
-rma_processed = helperRangeMigration(cdata,fastTime,fc,fs,prf,speed,numpulses,c,Rf);
-bpa_processed = helperBackProjection(cdata,rnggrid,fastTime,fc,fs,prf,speed,xRangeRes,c);
+rma_processed = doAzCompression(cdata,fc,fs,prf,numpulses,Rf,maxRange,speed);
 
 ranges = (0:1:truncrangesamples-1).*c/(2*fs);
 az = ((0:1:numpulses-1) - (numpulses-1)/2)*lambda/2;
 
 figure(4); %imagesc((abs((rma_processed(1700:2300,600:1400).'))));
-imagesc(az, ranges, abs(rma_processed.'));
+imagesc(abs(rma_processed.'));
 title('SAR Data focused using Range Migration algorithm ');
-xlabel('Azimuth (Degrees)');
-ylabel('Range (m)');
-
-figure(5); %imagesc((abs(bpa_processed(600:1400,1700:2300))));
-imagesc(az, ranges, abs(bpa_processed));
-title('SAR Data focused using Back-Projection algorithm ');
-xlabel('Azimuth (Degrees)');
-ylabel('Range (m)');
+xlabel('Cross-Range Samples');
+ylabel('Range Samples');
