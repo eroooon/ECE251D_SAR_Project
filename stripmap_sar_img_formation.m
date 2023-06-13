@@ -43,7 +43,7 @@ waveform = phased.LinearFMWaveform('SampleRate',fs,...
                                    'SweepBandwidth', bw);
                                
 % SAR transmitter, antenna looks orthogonal to flight track
-N = 4;
+%N = 4;
 antenna = phased.CosineAntennaElement('FrequencyRange', [1e9 6e9]); % fc = 4e9
 %antenna = phased.ULA('Element',element,'NumElements',N); % fc = 4e9
 antennaGain = aperture2gain(aperture,c/fc); 
@@ -84,7 +84,8 @@ plot(targetpos(2,1),targetpos(1,1),'*g'); grid on; hold on;
 plot(targetpos(2,2),targetpos(1,2),'*r');
 plot(targetpos(2,3),targetpos(1,3),'*b'); hold off;
 set(h,'Ydir','reverse');
-xlim([-10 10]); ylim([700 1500]);
+xlim([min(targetpos(2,:))-10, max(targetpos(2,:))+10]); ...
+    ylim([min(targetpos(1,:))-100  max(targetpos(1,:))+100]);
 title('Ground Truth Target Locations');
 ylabel('Range'); xlabel('Cross-Range');
 legend('Target 1','Target 2','Target 3','location','best');
