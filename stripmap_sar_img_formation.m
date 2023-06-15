@@ -160,5 +160,3 @@ imagesc(abs(rma_processed.'));
 title('SAR Data focused using Range Migration algorithm ');
 xlabel('Cross-Range Samples');
 ylabel('Range Samples');
-
-slcimg = rangeMigrationLFM(rxsig,waveform,fc,speed,Rf);
