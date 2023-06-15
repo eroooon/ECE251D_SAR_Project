@@ -1,28 +1,26 @@
-function [data, rnggrid] = doRangeCompression(rxsig, c, fs)
+function [data, rnggrid] = doRangeCompression(rxsig, tpd, bw, fs)
 
-speedOfLight = physconst('LightSpeed'); % speed of light
+% speed of light
+speedOfLight = physconst('LightSpeed');
 
-fftRes = size(rxsig,1) + length(c) + 1;
+% create time steps to generate reference waveform coefficients
+t = 0:1/fs:(tpd-1/fs);
 
-% fft of matched filter
-w =  zeros(fftRes,1);
-w(1:length(c)) = c;
-C = fft(w,fftRes);
+% chirp rate, LFM signal characteristic
+tau = bw/tpd;
 
-% output
-cdata = zeros(size(rxsig));
+% generate reference lfm waveform
+ref = exp(1i*pi*tau*(t.*t));
+
+% generate range compressed image
+data = zeros(size(rxsig));
 for ii=1:size(rxsig,2)
-    
-    % fft of range swath
-    swath = zeros(fftRes,1);
-    swath(1:size(rxsig,1)) = rxsig(:,ii);
-    S = fft(swath,fftRes);
-    
-    Y = S .* C;
-    y = ifft(Y,fftRes);
-    cdata(:,ii) = y(1:size(rxsig,1));
+
+    % correlate each range line with the complex conjugate of the
+    % transmitted chirp
+    convdata = conv(rxsig(:,ii),fliplr(conj(ref)));
+    data(:,ii) = convdata(end-size(rxsig,1)+1:end);
 end
 
-data = zeros(size(rxsig));
-data(1:(size(rxsig,1)-length(c)+1),:) = cdata(length(c):size(rxsig,1),:);
-rnggrid = (0:1:size(rxsig,1)-1)*speedOfLight/fs/2;
+%rnggrid = (0:1:size(rxsig,1)-1)*speedOfLight/(2*fs);
+rnggrid = (0:1:size(rxsig,1)-1)*speedOfLight/(2*tau*2*tpd);
